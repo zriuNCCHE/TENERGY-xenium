@@ -1,0 +1,91 @@
+k7:
+  display_order:
+    - neighborhood_7_k7
+    - neighborhood_1_k7
+    - neighborhood_2_k7
+    - neighborhood_3_k7
+    - neighborhood_6_k7
+    - neighborhood_4_k7
+    - neighborhood_5_k7
+  neighborhood_7_k7:
+    short_id: N7
+    canonical_name: Niche_iCAF_CXCL5
+    display_order: 1
+    concise_name: iCAF-myeloid
+    manuscript_name: iCAF-myeloid niche
+    dominant_features:
+      - iCAF_CXCL5
+      - Macro_CXCL5
+      - Mono_CDC27
+      - Mono_SLC2A3
+      - Neutrophil
+    response_association: non-cCR-associated at postC
+  neighborhood_1_k7:
+    short_id: N1
+    canonical_name: Niche_Mono
+    display_order: 2
+    concise_name: Monocyte
+    manuscript_name: Monocyte niche
+    dominant_features:
+      - Mono_CDC27
+      - Mono_SLC2A3
+      - Neutrophil
+    response_association: non-cCR-associated at postC
+  neighborhood_2_k7:
+    short_id: N2
+    canonical_name: Niche_Neutro
+    display_order: 3
+    concise_name: Neutrophil
+    manuscript_name: Neutrophil niche
+    dominant_features:
+      - Neutrophil
+      - Mono_SLC2A3
+      - Mono_CDC27
+    response_association: non-cCR-associated at postC
+  neighborhood_3_k7:
+    short_id: N3
+    canonical_name: Niche_Epi
+    display_order: 4
+    concise_name: A2ML1 epithelial
+    manuscript_name: A2ML1 epithelial niche
+    dominant_features:
+      - A2ML1+ epithelial cells
+      - malignant
+    response_association: cCR-associated at postC
+  neighborhood_6_k7:
+    short_id: N6
+    canonical_name: Niche_Macro_CXCL9
+    display_order: 5
+    concise_name: Macro-CXCL9
+    manuscript_name: Macro-CXCL9 niche
+    dominant_features:
+      - Macro_CXCL9
+      - B/Plasma
+      - iCAF_CXCL12
+      - endo_PLVAP
+    response_association: not significant at postC
+  neighborhood_4_k7:
+    short_id: N4
+    canonical_name: Niche_iCAF_CXCL6
+    display_order: 6
+    concise_name: iCAF-inflammatory
+    manuscript_name: iCAF-inflammatory niche
+    dominant_features:
+      - iCAF_CXCL6
+      - Macro_CXCL5
+      - iCAF_TNC
+      - Macro_CXCL9
+    response_association: non-cCR-associated at postC
+  neighborhood_5_k7:
+    short_id: N5
+    canonical_name: Niche_T_cell
+    display_order: 7
+    concise_name: T-cell-rich
+    manuscript_name: T-cell-rich immune niche
+    dominant_features:
+      - CD4_Treg_CCR8
+      - CD8_Tex_PDCD1
+      - CD8_Teff
+      - B/Plasma
+      - iCAF_CXCL6
+    response_association: not significant at postC

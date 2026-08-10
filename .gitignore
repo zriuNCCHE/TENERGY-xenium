@@ -1,0 +1,31 @@
+# macOS and editor metadata
+.DS_Store
+._*
+~$*
+
+# Python caches and local environments
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+env/
+
+# Large/private/generated analysis data
+data/
+
+# Generated figure/report outputs
+**/outputs/
+**/results/
+**/tmp/
+**/cache/
+
+# Runtime artifacts
+*.log
+.Rhistory
+.RData
+.Rproj.user/
+

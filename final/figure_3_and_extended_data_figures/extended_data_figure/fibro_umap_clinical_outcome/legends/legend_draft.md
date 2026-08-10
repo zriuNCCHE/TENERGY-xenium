@@ -1,0 +1,1 @@
+Extended Data Figure 4 fibroblast and endothelial UMAP by clinical outcome. UMAPs of fibroblast and endothelial cells split by clinical outcome group (`cCR` and `non-cCR`) and colored by refined cell state. Each dot represents one cell.

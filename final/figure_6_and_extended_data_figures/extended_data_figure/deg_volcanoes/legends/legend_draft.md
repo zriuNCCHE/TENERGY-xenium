@@ -1,0 +1,3 @@
+# DEG volcano plots supporting Figure 6
+
+(A) Volcano plot of genes differentially expressed in pretreatment non-cCR malignant cells compared with pretreatment cCR malignant cells. Positive log2 fold change indicates higher expression in non-cCR. Selected MP7 genes are annotated. (B) Volcano plot of genes differentially expressed in postC non-cCR malignant cells compared with pretreatment non-cCR malignant cells. Positive log2 fold change indicates higher expression after chemo-radiotherapy. Selected MP7 genes are annotated. Colored points indicate adjusted P < 0.05 and absolute log2 fold change >= 0.25.

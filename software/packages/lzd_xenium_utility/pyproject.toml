@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lzd-xenium-utility"
+version = "0.1.0"
+description = "Reusable utility functions for Xenium SpatialData processing."
+requires-python = ">=3.10"
+dependencies = [
+  "spatialdata",
+  "spatialdata-io",
+]
+
+[project.optional-dependencies]
+test = [
+  "pytest",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+

@@ -1,0 +1,8 @@
+nmf_neighborhood,short_id,canonical_name,display_order,concise_name,manuscript_name,dominant_features,notes
+neighborhood_7_k7,N7,Niche_iCAF_CXCL5,1,iCAF-myeloid,iCAF-myeloid niche,"iCAF_CXCL5; Macro_CXCL5; Mono_CDC27; Mono_SLC2A3; Neutrophil","Non-cCR-associated in postC area-weighted neighborhood analysis."
+neighborhood_1_k7,N1,Niche_Mono,2,Monocyte,Monocyte niche,"Mono_CDC27; Mono_SLC2A3; Neutrophil","Non-cCR-associated in postC area-weighted neighborhood analysis."
+neighborhood_2_k7,N2,Niche_Neutro,3,Neutrophil,Neutrophil niche,"Neutrophil; Mono_SLC2A3; Mono_CDC27","Non-cCR-associated in postC area-weighted neighborhood analysis."
+neighborhood_3_k7,N3,Niche_Epi,4,A2ML1 epithelial,A2ML1 epithelial niche,"A2ML1+ epithelial cells; malignant","cCR-associated in postC area-weighted neighborhood analysis."
+neighborhood_6_k7,N6,Niche_Macro_CXCL9,5,Macro-CXCL9,Macro-CXCL9 niche,"Macro_CXCL9; B/Plasma; iCAF_CXCL12; endo_PLVAP","Not significantly associated with cCR/non-cCR in current postC area-weighted analysis."
+neighborhood_4_k7,N4,Niche_iCAF_CXCL6,6,iCAF-inflammatory,iCAF-inflammatory niche,"iCAF_CXCL6; Macro_CXCL5; iCAF_TNC; Macro_CXCL9","Non-cCR-associated in postC area-weighted neighborhood analysis."
+neighborhood_5_k7,N5,Niche_T_cell,7,T-cell-rich,T-cell-rich immune niche,"CD4_Treg_CCR8; CD8_Tex_PDCD1; CD8_Teff; B/Plasma; iCAF_CXCL6","Not significantly associated with cCR/non-cCR in current postC area-weighted analysis."

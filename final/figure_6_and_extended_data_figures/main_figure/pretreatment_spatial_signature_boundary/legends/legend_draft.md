@@ -1,0 +1,5 @@
+# Legend Draft
+
+Pretreatment malignant-cell spatial organization of MP7-associated programs. Malignant cells were stratified by spatial region using the precomputed malignant-region annotation. Main comparisons were restricted to `tumor_inner` and `tumor_margin`; isolated malignant cells were excluded from statistical comparisons. MP7-related gene signatures were scored per malignant cell as the mean z-scored expression of available genes, then summarized at the sample-region level before statistical testing.
+
+Signature groups included the full MP7 program, laminin-332 (`LAMA3`, `LAMB3`, `LAMC2`), adhesion/anchoring (`COL17A1`, `ITGA6`, `ITGB4`, `ITGA3`, `PLEC`), remodeling/invasion (`MMP14`, `PLAU`, `SERPINE1`, `TNC`, `INHBA`), and stress/adaptation (`NDRG1`, `MYH9`, `SLC2A1`, `SLC7A5`, `CDKN1A`). Boxplots show sample-level summaries, with individual points representing samples. Boundary enrichment was defined as the matched sample-level margin minus inner signature score. P-values are computed using sample-level nonparametric tests.

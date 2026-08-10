@@ -1,0 +1,1 @@
+Extended Data Figure 3 immune UMAP by clinical outcome. UMAPs of immune cells split by clinical outcome group (`cCR` and `non-cCR`) and colored by annotated immune cell state. Each dot represents one cell.

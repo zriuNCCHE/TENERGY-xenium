@@ -1,0 +1,45 @@
+journal: Nature Cancer
+figure_width_mm:
+  max: 180
+  double_column: 180
+  single_column: 89
+font:
+  family: Helvetica
+  standard_pt: 7
+  small_pt: 6
+  title_pt: 8
+line:
+  standard_pt: 0.5
+part_sizes_mm:
+  paired_two_group_boxplot:
+    width: 80
+    height: 88
+  immune_four_subset_grid:
+    width: 105
+    height: 155
+  postc_four_subset_outcome:
+    width: 105
+    height: 80
+  postc_single_t_subset_outcome:
+    width: 70
+    height: 78
+  longitudinal_single_t_subset_grid:
+    width: 88
+    height: 105
+  fibro_immune_six_subset_grid:
+    width: 150
+    height: 135
+  postc_two_subset_outcome:
+    width: 75
+    height: 90
+  supplementary_qc_overview:
+    width: 180
+    height: 150
+  broad_compartment_composition:
+    width: 180
+    height: 95
+export:
+  final_formats:
+    - pdf
+  exploratory_formats:
+    - pdf

@@ -1,0 +1,3 @@
+# Exploratory Legend - Macro_CXCL5 and Myeloid Niches
+
+Post-chemoradiotherapy cells were assigned to a unique spatial niche by selecting the highest score among the seven k = 7 neighborhood scores. For each patient and niche, cell fractions were calculated as the number of cells in the indicated subtype divided by the total number of cells assigned to that niche. Correlation plots compare Macro_CXCL5 fraction with Mono_CDC27, Mono_SLC2A3, Neutrophil, or the combined myeloid fraction across patient-niche observations. P values are exploratory and were calculated using two-sided Spearman correlation unless otherwise indicated.

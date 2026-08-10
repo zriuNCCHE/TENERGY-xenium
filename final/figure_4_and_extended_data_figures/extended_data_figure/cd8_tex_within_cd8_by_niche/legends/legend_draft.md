@@ -1,0 +1,3 @@
+# Extended Data Figure 5 Legend Draft - CD8_Tex_PDCD1 within CD8 across spatial niches
+
+Post-chemoradiotherapy cells were assigned to a unique spatial niche by selecting the highest k = 7 neighborhood score. For each patient and non-epithelial niche, the proportion of CD8_Tex_PDCD1 cells was calculated among all CD8 T cells (CD8_Teff, CD8_Tex_PDCD1 and CD8_prolif) assigned to the same niche. Niche_Epi and patient-niche observations without CD8 cells were excluded. Niches are ordered from lower to higher median proportion. The global P value was calculated using a Kruskal-Wallis test across defined patient-niche observations.

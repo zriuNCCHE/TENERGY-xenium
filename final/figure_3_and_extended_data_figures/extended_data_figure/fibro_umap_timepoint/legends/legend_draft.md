@@ -1,0 +1,1 @@
+Extended Data Figure 4 fibroblast and endothelial UMAP by treatment timepoint. UMAPs of fibroblast and endothelial cells split by pretreatment, post-chemoradiotherapy, and post-atezolizumab timepoints and colored by refined cell state. Each dot represents one cell.

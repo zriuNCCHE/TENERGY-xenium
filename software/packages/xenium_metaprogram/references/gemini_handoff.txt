@@ -1,0 +1,125 @@
+# ==============================================================================
+# GEMINI HANDOFF DOCUMENT: META-PROGRAM (MP) ANALYSIS PIPELINE GUIDE
+# PROJECT: TENERGY (Esophageal Squamous Cell Carcinoma - ESCC)
+# DATA MODALITY: Xenium 5k Targeted Spatial Transcriptomics
+# ==============================================================================
+
+This document serves as a comprehensive guide, history, and architectural blueprint 
+for the development of the `MalignantMetaProgrammer` class. It is written to 
+transfer all context, hard-learned lessons, and parameter optimizations to another 
+AI or developer continuing this project.
+
+## 1. PROJECT CONTEXT & THE CORE CHALLENGE
+The objective is to identify shared, conserved biological Meta-Programs (MPs) 
+across malignant cells from multiple ESCC patients. 
+
+* **The Problem:** In ESCC, malignant cells have massive patient-specific Copy 
+  Number Variations (CNVs). Standard clustering or matrix factorization groups cells 
+  by "Patient Identity" (Clones) rather than shared functional biology (e.g., 
+  Proliferation, Hypoxia, Keratinization).
+* **The Baseline:** We started with the methodology from Gavish et al. (Nature 2023), 
+  which used multi-K Non-negative Matrix Factorization (NMF) on pan-cancer 
+  scRNA-seq data to find 41 universal meta-programs.
+* **The Reality:** The Gavish pipeline failed on our data. It is built for massive 
+  (1000+ patient) whole-transcriptome cohorts. Applied to a targeted 5k Xenium 
+  panel for a smaller cohort, their strict filters acted like a "black hole," 
+  erasing subtle but critical spatial states (like scattered MKI67+ cycling cells).
+
+---
+
+## 2. HOW OUR METHOD DIVERS FROM THE ORIGINAL (GAVISH ET AL.)
+
+To adapt the pipeline for high-resolution spatial data, we made several critical 
+architectural deviations:
+
+### A. Patient-Specific Centering (The Clone Neutralizer)
+* **Original:** Centered genes across all cells in a study.
+* **Our Method:** We enforce strict per-patient centering (`centered_pos` layer).
+* **Rationale:** We subtract the mean expression profile of *each patient* from 
+  their own cells, replacing negative values with 0. This mathematically deletes 
+  the CNV/Clonal background bias, forcing NMF to factorize only the intra-tumor 
+  variance. This was the breakthrough that finally revealed the Proliferation MP.
+
+### B. Normalization Strategy
+* **Original:** log2(CPM/10 + 1). Designed to suppress sparse scRNA-seq noise.
+* **Our Method:** Standard sc.pp.log1p. 
+* **Rationale:** Xenium 5k is highly dense and sensitive. Dividing by 10 artificially 
+  flattens the dynamic range of the spatial probes.
+
+### C. Clustering & Robustness Triage
+* **Original:** Aggressive 3-step filtering (must appear across multiple Ks and 
+  patients with high overlap) followed by a binary "Founder-based" clustering.
+* **Our Method:** Hierarchical clustering (ward/average linkage) with a relaxed 
+  consensus threshold (gene must appear in >= 20% of patient-programs in a cluster).
+* **Rationale:** Relaxing the strictness prevents the algorithm from deleting 
+  clinically relevant "Mega-States" that are slightly noisier but highly 
+  predictive of treatment resistance.
+
+---
+
+## 3. TESTS CONDUCTED & LESSONS LEARNED
+
+### Test 1: Raw Counts vs. Centered Positives
+* **Action:** Ran NMF on standard log-normalized counts.
+* **Result:** Failed. Heatmaps were a "starry night" mess.
+* **Lesson:** NMF cannot overcome patient CNV bias on its own. The `centered_pos` 
+  transformation is non-negotiable for this cohort.
+
+### Test 2: The "Purity vs. Clinical Significance" Trade-off
+* **Action:** Attempted to "purify" a mixed resistance program (ECM + Hypoxia) by 
+  pushing resolution high (K=10 to 18) and restricting genes (top_n=30, threshold=0.35).
+* **Result:** The heatmap became mathematically beautiful (sharp, distinct blocks). 
+  However, the clinical significance (cCR vs. non-cCR violin plots) plummeted.
+* **Lesson (CRITICAL):** In ESCC, therapeutic resistance is driven by a complex 
+  p-EMT "Mega-State" (e.g., LAMA3, MMP14, COL17A1 co-expressed with Hypoxia/Stress). 
+  High-resolution NMF fractures this functional unit into pure, but clinically weak, 
+  sub-programs. **We must prioritize lower K ranges to preserve complex biological states.**
+
+### Test 3: Handling Sparse Matrices & NaNs
+* **Action:** Attempted to extract and cluster sub-structures of specific MPs.
+* **Result:** Threw `FloatingPointError: NaN dissimilarity value` and `ValueError`.
+* **Lesson:** When subsetting Xenium data, some genes drop to zero variance. 
+  Attempting to run `df.corr()` on zero-variance genes yields NaNs. The AI must 
+  always include a zero-variance filter (`df = df.loc[:, df.std() > 0]`) before 
+  clustering or correlating subsets. 
+
+### Test 4: GPU Acceleration Bottlenecks
+* **Action:** Ran the multi-K NMF grid search on a GPU-enabled HPC node.
+* **Result:** GPU utilization was 0%. Scikit-learn is strictly CPU-bound.
+* **Lesson:** We updated the architecture to conditionally import `cuml.decomposition.NMF` 
+  (RAPIDS) if available, converting input matrices to dense `float32`. This reduces 
+  compute time from hours to seconds.
+
+---
+
+## 4. THE OPTIMAL "TENERGY" PIPELINE PARAMETERS
+
+For the incoming AI developing this further, do NOT try to over-engineer the 
+filtering. Stick to these battle-tested parameters for the best clinical readouts:
+
+1. **Pre-processing:** Must use the `centered_pos` layer logic.
+2. **NMF K-Range:** `k_range=(7, 15)`. (Do not push to 30; it fractures the biology).
+3. **Gene Definition:** `top_n=50`. (Captures the full weight of the state).
+4. **MP Clusters:** `n_mps=10` to `15`.
+5. **Consensus Threshold:** `0.20`. (Allows complex states to form).
+
+## 5. KEY BIOLOGICAL ANCHORS (GROUND TRUTHS)
+When refactoring or testing new code, the AI should verify the pipeline is working 
+by checking for these known states:
+* **Proliferation:** Should see a distinct MP dominated by `MKI67`, `TOP2A`.
+* **Keratinization:** Should see a distinct MP with `KRT1`, `KRT10`, `IVL`.
+* **Invasive/Resistance Front:** The holy grail of this dataset. Look for a program 
+  containing `MMP14`, `COL17A1`, `LAMA3`, `LAMC2`, `CD44`, often mixed with metabolic 
+  stress (`LDHA`, `SLC7A5`). This state is highly enriched in non-cCR patients.
+
+## 6. DEVELOPMENT RULES FOR THE NEXT AI
+1. **State Management:** Always clear `self.all_programs = []` at the start of the 
+   `run_pipeline()` method. Failing to do so causes massive array accumulation and 
+   throws `IndexError: index out of bounds` during Seaborn plotting.
+2. **Matrix Handling:** Xenium data is large. Safely handle sparse matrices using 
+   `.toarray()` only when necessary for NMF or correlation to avoid memory explosion.
+3. **Plotting:** Rely on `sc.pl.spatial` to validate that the discovered MPs map 
+   cleanly to tumor architectures (e.g., the Invasive/Resistance MP should map to 
+   the stroma-tumor interface).
+
+[END OF HANDOFF DOCUMENT]
