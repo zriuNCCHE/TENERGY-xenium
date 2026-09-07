@@ -1,5 +1,0 @@
-Figure 7 MP7-myeloid exploratory legends
-
-Boxplot panels. Sample-level median nearest-neighbor distance from each malignant-cell metaprogram to the indicated myeloid target. Each dot is one pretreatment sample. Boxes show median and interquartile range. Pooled myeloid is defined as neutrophils, Mono_CDC27 and Mono_SLC2A3 cells.
-
-Cell-level CDF panels. Cumulative distribution of nearest-neighbor distances from malignant-cell metaprogram cells to the indicated myeloid target. A left-shifted curve indicates shorter cell-level distances. These panels are descriptive; manuscript statistics should prioritize the sample-level boxplots.

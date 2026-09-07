@@ -8,8 +8,8 @@ Large exported data tables and raw analysis inputs are intentionally not tracked
 
 - `config/`: shared plotting parameters, color palettes, and spatial niche names.
 - `final/`: figure-specific code and documentation for final manuscript figures and extended data figures.
-- `exploratory/`: exploratory analysis code retained for internal scientific review.
 - `software/`: reusable Python packages that were previously prepared as supplementary software archives.
+- `DATA_UPLOAD_PLAN.md`: inventory of data files, with recommendations for GitHub versus GEO or another data repository.
 - `design_principles.md`: project-level plotting and organization principles.
 
 ## Reusable Software
@@ -27,4 +27,4 @@ Figure wrapper scripts remain in the corresponding `final/figure_*_and_extended_
 
 ## GitHub Scope
 
-This repository is intended for sharing code and lightweight documentation. Generated outputs, result tables, and data files are excluded from version control to keep the repository suitable for GitHub.
+This repository is intended for sharing code and lightweight documentation. Exploratory analyses are excluded from the repository. Generated outputs, result tables, and data files are excluded from version control to keep the repository suitable for GitHub. See `DATA_UPLOAD_PLAN.md` before preparing the public data deposit.

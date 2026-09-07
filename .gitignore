@@ -16,6 +16,12 @@ env/
 
 # Large/private/generated analysis data
 data/
+!data/
+data/*
+!data/_updated_survival/
+!data/_updated_survival/*.xlsx
+!data/_updated_survival/*.pptx
+data/_updated_survival/~$*
 
 # Generated figure/report outputs
 **/outputs/
@@ -28,4 +34,3 @@ data/
 .Rhistory
 .RData
 .Rproj.user/
-

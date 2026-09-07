@@ -1,1 +1,0 @@
-Exploratory pretreatment area analysis. Box plots compare summed CNV-high cell area and malignant cell area between pretreatment cCR and non-cCR samples. Area fraction is calculated relative to total measured cell area per sample. P values are two-sided Wilcoxon rank-sum tests.
