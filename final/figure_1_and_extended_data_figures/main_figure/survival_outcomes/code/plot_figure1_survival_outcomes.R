@@ -10,17 +10,27 @@ script_arg <- grep("^--file=", commandArgs(trailingOnly = FALSE), value = TRUE)[
 script_path <- normalizePath(sub("^--file=", "", script_arg))
 part_dir <- normalizePath(file.path(dirname(script_path), ".."), mustWork = TRUE)
 project_root <- normalizePath(file.path(part_dir, "..", "..", "..", ".."), mustWork = TRUE)
-data_path <- file.path(project_root, "data", "_updated_survival", "20260904TENERGY初発症例データ一覧.xlsx")
+data_path <- file.path(project_root, "data", "_updated_survival", "20261008TENERGY初発症例データ一覧.xlsx")
+endpoint_arg <- grep("^--endpoint=", commandArgs(trailingOnly = TRUE), value = TRUE)
+endpoint_selection <- if (length(endpoint_arg)) sub("^--endpoint=", "", endpoint_arg[[1]]) else "all"
+stopifnot(endpoint_selection %in% c("all", "pfs", "os"))
 output_dir <- file.path(part_dir, "outputs")
 legend_dir <- file.path(part_dir, "legends")
 dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
 dir.create(legend_dir, recursive = TRUE, showWarnings = FALSE)
+
+# Build grobs on Quartz so Arial metrics match the final PDF device.
+metrics_file <- tempfile(fileext = ".pdf")
+grDevices::quartz(type = "pdf", file = metrics_file, family = "Arial")
 
 # Nature Cancer final-artwork minimum: 0.5 pt lines. ggplot2 line widths are mm.
 line_width <- 0.5 / ggplot2::.pt
 clinical_colors <- c(cCR = "#7BB6A4", `non-cCR` = "#F2A38A")
 
 dat <- read_excel(data_path, sheet = "TENERGY長期追跡")
+stopifnot(nrow(dat) == 40, !anyDuplicated(dat$caseno),
+          all(dat$CR %in% c(0, 1)), all(dat$event_pfs_obs %in% c(0, 1)),
+          all(is.finite(dat$leng_pfs_obsm)), all(dat$leng_pfs_obsm >= 0))
 dat$CR_group <- factor(ifelse(dat$CR == 1, "cCR", "non-cCR"),
                        levels = c("cCR", "non-cCR"))
 
@@ -31,7 +41,7 @@ format_p <- function(p) {
 build_km_panel <- function(data, time_col, event_col, endpoint, by_response = FALSE) {
   if (by_response) {
     fit_formula <- as.formula(paste0("Surv(`", time_col, "`, `", event_col, "`) ~ CR_group"))
-    fit <- survfit(fit_formula, data = data)
+    fit <- survfit(fit_formula, data = data, conf.type = "log-log")
     lr <- survdiff(fit_formula, data = data)
     p_value <- pchisq(lr$chisq, df = length(lr$n) - 1, lower.tail = FALSE)
     cox_fit <- coxph(fit_formula, data = data)
@@ -44,7 +54,7 @@ build_km_panel <- function(data, time_col, event_col, endpoint, by_response = FA
     group_title <- "cCR status"
   } else {
     fit_formula <- as.formula(paste0("Surv(`", time_col, "`, `", event_col, "`) ~ 1"))
-    fit <- survfit(fit_formula, data = data)
+    fit <- survfit(fit_formula, data = data, conf.type = "log-log")
     p_value <- hr <- ci_low <- ci_high <- NA_real_
     group_levels <- "All patients"
     group_colors <- c(`All patients` = "#000000")
@@ -100,7 +110,7 @@ build_km_panel <- function(data, time_col, event_col, endpoint, by_response = FA
       y = c(0.16, 0.09),
       label = c(
         paste0("log-rank ", format_p(p_value)),
-        paste0("HR = ", formatC(hr, format = "f", digits = 2),
+        paste0("HR (fixed group) = ", formatC(hr, format = "f", digits = 2),
                " (95% CI ", formatC(ci_low, format = "f", digits = 2),
                "-", formatC(ci_high, format = "f", digits = 2), ")")
       )
@@ -153,28 +163,26 @@ build_km_panel <- function(data, time_col, event_col, endpoint, by_response = FA
       expand = expansion(mult = c(0, 0.025))
     ) +
     scale_y_discrete(limits = rev(group_levels), expand = expansion(add = 0.38)) +
+    coord_cartesian(clip = "off") +
     labs(x = NULL, y = NULL) +
     theme_classic(base_family = "Arial", base_size = 7) +
     theme(
       axis.line = element_blank(), axis.ticks = element_blank(),
       axis.text.x = element_text(size = 6, colour = "black"),
-      axis.text.y = element_text(size = 6, colour = "black"),
+      axis.text.y = element_text(size = 6, colour = "black", margin = margin(r = 8)),
       plot.margin = margin(0, 4, 1, 4, "mm")
     )
 
+  main_grob <- ggplotGrob(main_plot)
+  risk_grob <- ggplotGrob(risk_plot)
+  aligned_widths <- unit.pmax(main_grob$widths, risk_grob$widths)
+  main_grob$widths <- risk_grob$widths <- aligned_widths
   list(
-    grob = arrangeGrob(main_plot, risk_plot, ncol = 1, heights = c(4.6, 1)),
-    p_value = p_value, hr = hr, ci_low = ci_low, ci_high = ci_high
+    grob = arrangeGrob(main_grob, risk_grob, ncol = 1, heights = c(4.6, 1)),
+    p_value = p_value, hr = hr, ci_low = ci_low, ci_high = ci_high,
+    fit = fit, curves = curve_df, risk = risk_df
   )
 }
-
-os_all <- build_km_panel(dat, "leng_os_obsm", "event_os_obs", "Overall survival", by_response = FALSE)
-os_cr <- build_km_panel(dat, "leng_os_obsm", "event_os_obs", "Overall survival", by_response = TRUE)
-pfs_all <- build_km_panel(dat, "leng_pfs_obsm", "event_pfs_obs", "Progression-free survival", by_response = FALSE)
-pfs_cr <- build_km_panel(dat, "leng_pfs_obsm", "event_pfs_obs", "Progression-free survival", by_response = TRUE)
-
-figure1b <- arrangeGrob(os_all$grob, os_cr$grob, ncol = 2)
-figure1c <- arrangeGrob(pfs_all$grob, pfs_cr$grob, ncol = 2)
 
 # The macOS Quartz device registers the installed Arial TrueType font reliably.
 save_arial_pdf <- function(grob, filename, width = 6.7, height = 2.6) {
@@ -185,15 +193,43 @@ save_arial_pdf <- function(grob, filename, width = 6.7, height = 2.6) {
   grDevices::dev.off()
 }
 
-save_arial_pdf(figure1b, file.path(output_dir, "figure1b_overall_survival.pdf"))
-save_arial_pdf(figure1c, file.path(output_dir, "figure1c_progression_free_survival.pdf"))
+if (endpoint_selection %in% c("all", "os")) {
+  os_all <- build_km_panel(dat, "leng_os_obsm", "event_os_obs", "Overall survival", by_response = FALSE)
+  os_cr <- build_km_panel(dat, "leng_os_obsm", "event_os_obs", "Overall survival", by_response = TRUE)
+  save_arial_pdf(arrangeGrob(os_all$grob, os_cr$grob, ncol = 2),
+                 file.path(output_dir, "figure1b_overall_survival.pdf"))
+  message("OS log-rank ", format_p(os_cr$p_value), "; HR = ", formatC(os_cr$hr, format = "f", digits = 4))
+}
+if (endpoint_selection %in% c("all", "pfs")) {
+  pfs_all <- build_km_panel(dat, "leng_pfs_obsm", "event_pfs_obs", "Progression-free survival", by_response = FALSE)
+  pfs_cr <- build_km_panel(dat, "leng_pfs_obsm", "event_pfs_obs", "Progression-free survival", by_response = TRUE)
+  save_arial_pdf(arrangeGrob(pfs_all$grob, pfs_cr$grob, ncol = 2),
+                 file.path(output_dir, "figure1c_progression_free_survival.pdf"))
+  save_arial_pdf(pfs_all$grob, file.path(output_dir, "figure1c_pfs_all_patients.pdf"), 3.35, 2.6)
+  save_arial_pdf(pfs_cr$grob, file.path(output_dir, "figure1c_pfs_by_response.pdf"), 3.35, 2.6)
+  write.csv(pfs_all$curves, file.path(output_dir, "pfs_all_curve.csv"), row.names = FALSE)
+  write.csv(pfs_cr$curves, file.path(output_dir, "pfs_by_response_curve.csv"), row.names = FALSE)
+  write.csv(pfs_cr$risk, file.path(output_dir, "pfs_by_response_at_risk.csv"), row.names = FALSE)
+  median_tables <- rbind(
+    data.frame(group = "All patients", t(summary(pfs_all$fit)$table), check.names = FALSE),
+    data.frame(group = c("cCR", "non-cCR"), summary(pfs_cr$fit)$table, check.names = FALSE)
+  )
+  write.csv(median_tables, file.path(output_dir, "pfs_km_summary.csv"), row.names = FALSE)
+  write.csv(data.frame(source = basename(data_path), model = "Fixed-response-group Cox, non-cCR versus cCR; not time-dependent",
+                       logrank_p = pfs_cr$p_value, HR = pfs_cr$hr,
+                       CI_low = pfs_cr$ci_low, CI_high = pfs_cr$ci_high),
+            file.path(output_dir, "pfs_statistics.csv"), row.names = FALSE)
+  message("PFS log-rank p = ", format(pfs_cr$p_value, digits = 16),
+          "; fixed-group HR = ", formatC(pfs_cr$hr, format = "f", digits = 4))
+}
 
 writeLines(c(
   "# Figure 1b-c survival outcomes", "",
   "**Figure 1b | Overall survival in the updated TENERGY initial cohort.** Kaplan-Meier estimates of overall survival from clinical-trial registration for all patients (left) and by clinical response (right; cCR, n = 16; non-cCR, n = 24).", "",
   "**Figure 1c | Progression-free survival in the updated TENERGY initial cohort.** Kaplan-Meier estimates of progression-free survival from clinical-trial registration for all patients (left) and by clinical response (right; cCR, n = 16; non-cCR, n = 24).", "",
-  "Crosses denote censored observations. Numbers below each curve are patients at risk. Between-response comparisons use two-sided log-rank tests; hazard ratios (HRs; non-cCR versus cCR) and 95% confidence intervals are from univariable Cox proportional-hazards models. OS uses `leng_os_obsm` and `event_os_obs`; PFS uses `leng_pfs_obsm` and `event_pfs_obs`."
+  "Crosses denote censored observations. Numbers below each curve are patients at risk. Between-response comparisons use two-sided log-rank tests; hazard ratios (HRs; non-cCR versus cCR) and 95% confidence intervals are from univariable Cox proportional-hazards models with eventual response treated as a fixed group. These are descriptive post-treatment group comparisons, not time-dependent Cox estimates, and are susceptible to guarantee-time bias. OS uses `leng_os_obsm` and `event_os_obs`; PFS uses `leng_pfs_obsm` and `event_pfs_obs`. Median survival confidence intervals use the log-log transformation.", "",
+  "PFS source updated to `20261008TENERGY初発症例データ一覧.xlsx`. OS artwork was not regenerated in the October 8 PFS-only run. The statistical department's time-dependent Cox estimate for PFS is a different analysis: cCR versus non-cCR HR 0.39 (95% CI 0.15-1.05), P = 0.063, as reported in the October 8 presentation; this script does not reconstruct that model without response-onset dates."
 ), file.path(legend_dir, "figure1b_c_survival_legends.md"))
 
-message("OS log-rank ", format_p(os_cr$p_value), "; HR = ", formatC(os_cr$hr, format = "f", digits = 4))
-message("PFS log-rank ", format_p(pfs_cr$p_value), "; HR = ", formatC(pfs_cr$hr, format = "f", digits = 4))
+grDevices::dev.off()
+unlink(metrics_file)

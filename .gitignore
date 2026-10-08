@@ -19,9 +19,11 @@ data/
 !data/
 data/*
 !data/_updated_survival/
-!data/_updated_survival/*.xlsx
+data/_updated_survival/*.xlsx
+!data/_updated_survival/20261008*.xlsx
 data/_updated_survival/~$*
 data/_updated_survival/*.pptx
+!data/_updated_survival/20261008*.pptx
 
 # Generated figure/report outputs
 **/outputs/
